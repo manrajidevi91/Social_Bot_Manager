@@ -40,14 +40,15 @@ def require_login():
 
 @manager_bp.route('/login', methods=['GET', 'POST'])
 def login():
+    cache_version = int(time.time())
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
         if username == "admin" and password == "admin123":
             session['user_logged_in'] = True
             return redirect(url_for("manager_bp.index"))
-        return render_template("login.html", error="Invalid credentials")
-    return render_template("login.html")
+        return render_template("login.html", error="Invalid credentials", cache_version=cache_version)
+    return render_template("login.html", cache_version=cache_version)
 
 @manager_bp.route("/logout")
 def logout():
@@ -133,7 +134,8 @@ def serve_app_logo(app_name, image_filename):
 def index():
     buttons_data = load_buttons()
     buttons = [(info["button_name"], folder, info["image"]) for folder, info in buttons_data.items()]
-    return render_template("index.html", buttons=buttons)
+    cache_version = int(time.time())
+    return render_template("index.html", buttons=buttons, cache_version=cache_version)
 
 @manager_bp.route('/upload', methods=['POST'])
 def upload():
