@@ -1,6 +1,7 @@
 import importlib.util
 import importlib
 from flask import Flask, render_template, request, jsonify, redirect, url_for, Blueprint, session, send_from_directory
+import mysql.connector
 import os
 import shutil
 import json
@@ -46,7 +47,7 @@ def login():
         password = request.form.get("password")
         if username == "admin" and password == "admin123":
             session['user_logged_in'] = True
-            return redirect(url_for("manager_bp.index"))
+            return redirect(url_for("manager_bp.dashboard"))
         return render_template("login.html", error="Invalid credentials", cache_version=cache_version)
     return render_template("login.html", cache_version=cache_version)
 
@@ -91,6 +92,32 @@ def save_buttons(data):
     with open(JSON_FILE, "w") as f:
         json.dump(data, f, indent=4)
 
+def get_active_discount():
+    """Return the highest value active discount or None."""
+    try:
+        conn = mysql.connector.connect(
+            host=os.getenv("DB_HOST", "localhost"),
+            port=int(os.getenv("DB_PORT", 3306)),
+            user=os.getenv("DB_USER", "root"),
+            password=os.getenv("DB_PASSWORD", ""),
+            database=os.getenv("DB_NAME", "botmanager"),
+        )
+        cursor = conn.cursor(dictionary=True)
+        query = (
+            "SELECT name, value, type FROM discounts "
+            "WHERE active=1 AND (start_date IS NULL OR start_date <= NOW()) "
+            "AND (end_date IS NULL OR end_date >= NOW()) "
+            "ORDER BY value DESC LIMIT 1"
+        )
+        cursor.execute(query)
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"Error fetching discount: {e}")
+        return None
+
 def terminate_process_by_pid(pid):
     """Kill the running process using the stored PID."""
     try:
@@ -108,6 +135,20 @@ def create_button(folder_name):
     # Use url_for for the default image to ensure correct path resolution
     default_image_url = url_for('static', filename='images/default.png')
     return info.get("button_name", folder_name), folder_name, info.get("image", default_image_url)
+
+
+@app.route("/")
+def landing_page():
+    """Public landing page showing active discount and login/dashboard link."""
+    discount = get_active_discount()
+    logged_in = 'user_logged_in' in session
+    cache_version = int(time.time())
+    return render_template(
+        "landing.html",
+        discount=discount,
+        logged_in=logged_in,
+        cache_version=cache_version,
+    )
 
 @manager_bp.route('/app_logo/<app_name>/<image_filename>')
 def serve_app_logo(app_name, image_filename):
@@ -130,8 +171,8 @@ def serve_app_logo(app_name, image_filename):
         print(f"Error serving image {image_filename} from {app_dir}: {e}")
         return jsonify({"status": "error", "message": f"Error serving image: {e}"}), 500
 
-@manager_bp.route("/")
-def index():
+@manager_bp.route("/dashboard")
+def dashboard():
     buttons_data = load_buttons()
     buttons = [(info["button_name"], folder, info["image"]) for folder, info in buttons_data.items()]
     cache_version = int(time.time())
@@ -310,9 +351,9 @@ def upload():
         if not button_name:
              print("Upload failed: Button name was empty.")
         # Consider adding a Flask flash message here for the user
-        return redirect(url_for("manager_bp.index")) # Redirect back, maybe with an error message
+        return redirect(url_for("manager_bp.dashboard")) # Redirect back, maybe with an error message
 
-    return redirect(url_for("manager_bp.index"))
+    return redirect(url_for("manager_bp.dashboard"))
 
 @manager_bp.route("/delete/<folder_name>")
 def delete_script(folder_name):

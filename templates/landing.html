@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bot Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ cache_version }}">
+</head>
+<body class="landing-page">
+    <h1>Welcome to the Bot Manager</h1>
+    <p>Manage and explore a variety of automation bots with ease.</p>
+    {% if discount %}
+    <div class="discount-banner">
+        <strong>{{ discount.name }}:</strong> {{ discount.value }}
+    </div>
+    {% endif %}
+    {% if logged_in %}
+        <a href="{{ url_for('manager_bp.dashboard') }}">Go to Dashboard</a>
+    {% else %}
+        <a href="{{ url_for('manager_bp.login') }}">Login</a>
+    {% endif %}
+</body>
+</html>
