@@ -86,7 +86,7 @@ This guide provides the full user and admin workflows for the Bot Management Saa
    - System:
      - Extracts + validates Flask app
      - Renames entry file as `main.py`
-    - Installs `requirements.txt` with `pip`
+    - Installs `requirements.txt` using the Python `install_requirements` helper
      - Registers app via DispatcherMiddleware under `/bot-name`
    - Admin provides:
      - Name
