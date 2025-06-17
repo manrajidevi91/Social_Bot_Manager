@@ -16,17 +16,18 @@ app = Flask(__name__)
 app.secret_key = "541cs65g6reghk;tlh3241d65fytxcn"  # Required for session management
 
 # Base paths
-BASE_PATH = r"C:\Apps\flask_bot_manager\python_scripts"
-BASE_DIR = "C:\\Apps\\flask_bot_manager"
+BASE_DIR = os.getenv("BOT_MANAGER_HOME", os.path.dirname(os.path.abspath(__file__)))
+BASE_PATH = os.path.join(BASE_DIR, "python_scripts")
 SCRIPT_DIR = os.path.join(BASE_DIR, "python_scripts")
 BACKUP_DIR = os.path.join(BASE_DIR, "python_scripts_backup")
-# IMAGE_PATH = os.path.join(app.static_folder, "images") # No longer needed for central app logos
-VENV_PATH = "venv"
+# IMAGE_PATH = os.path.join(app.static_folder, "images")  # No longer needed for central app logos
+VENV_PATH = os.path.join(BASE_DIR, "venv")
 JSON_FILE = os.path.join(BASE_PATH, "buttons.json")
 TEMP_EXTRACT_PATH = os.path.join(BASE_PATH, "temp_extract")
 
 os.makedirs(BASE_PATH, exist_ok=True)
-# os.makedirs(IMAGE_PATH, exist_ok=True) # No longer needed for central app logos
+os.makedirs(BACKUP_DIR, exist_ok=True)
+# os.makedirs(IMAGE_PATH, exist_ok=True)  # No longer needed for central app logos
 
 # Step 1: Blueprint define karo
 manager_bp = Blueprint('manager_bp', __name__)
