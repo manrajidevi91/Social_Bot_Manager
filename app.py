@@ -71,6 +71,15 @@ def create_backup(folder_name):
     shutil.copytree(script_dir, backup_path)
     print(f"✅ Backup created at: {backup_path}")
 
+def install_requirements(req_path):
+    """Install dependencies from a requirements file using pip."""
+    script_dir = os.path.dirname(req_path)
+    subprocess.run(
+        [sys.executable, "-m", "pip", "install", "-r", req_path],
+        check=True,
+        cwd=script_dir,
+    )
+
 def load_buttons():
     if os.path.exists(JSON_FILE):
         with open(JSON_FILE, "r") as f:
@@ -213,67 +222,24 @@ def upload():
              print("Found 'main.py'. No rename needed.")
 
 
-        # --- Start: Install requirements using venv.bat ---
+        # --- Install requirements using pip ---
         req_path = os.path.join(script_dir, "requirements.txt")
         if os.path.exists(req_path):
-            print(f"Found requirements.txt at {req_path}. Attempting installation via batch script.")
-            source_bat_path = os.path.join(BASE_DIR, "venv.bat") # Path to your master batch file
-            dest_bat_path = os.path.join(script_dir, "venv.bat")   # Path to copy it inside the script dir
-
-            if os.path.exists(source_bat_path):
-                try:
-                    shutil.copy2(source_bat_path, dest_bat_path) # copy2 preserves metadata
-                    print(f"Copied '{source_bat_path}' to '{dest_bat_path}'.")
-
-                    print(f"Attempting to run batch file: '{dest_bat_path}' from CWD: '{script_dir}'")
-                    # Execute the copied batch file FROM the script directory
-                    result = subprocess.run(
-                        [dest_bat_path],      # Command is the path to the .bat
-                        check=True,           # Raise error on failure
-                        capture_output=True,  # Capture stdout and stderr
-                        text=True,            # Decode output as text
-                        shell=False,          # Better not to use shell=True if not needed
-                        cwd=script_dir        # CRUCIAL: Run from the script's directory
-                    )
-                    print(f"✅ Batch file execution successful for '{folder_name}':")
-                    print("--- Batch Script Output Start ---")
-                    print(result.stdout)
-                    print("--- Batch Script Output End ---")
-
-                    # Optional: Clean up the copied batch file after successful run
-                    # try:
-                    #    os.remove(dest_bat_path)
-                    #    print(f"Removed temporary batch file: {dest_bat_path}")
-                    # except OSError as e:
-                    #    print(f"⚠️ Warning: Could not remove temporary batch file {dest_bat_path}: {e}")
-
-                except FileNotFoundError:
-                    print(f"❌ Error: Batch file '{dest_bat_path}' not found or cannot be executed. Installation skipped.")
-                    # Decide if this is a fatal error or just a warning
-                    # shutil.rmtree(script_dir) # Uncomment to treat as fatal
-                    # return "Error: Installation script not found.", 500
-                except subprocess.CalledProcessError as e:
-                    print(f"❌ Error running batch file {dest_bat_path}:")
-                    print(f"Return code: {e.returncode}")
-                    print("--- Batch Script Stderr Start ---")
-                    print(e.stderr)
-                    print("--- Batch Script Stderr End ---")
-                    print("--- Batch Script Stdout Start ---")
-                    print(e.stdout) # Also show stdout on error
-                    print("--- Batch Script Stdout End ---")
-                    # Clean up the failed upload
-                    shutil.rmtree(script_dir)
-                    # Also remove button data if already added? Not added yet, so OK.
-                    return "Error: Failed to execute dependency installation script.", 500
-                except Exception as e: # Catch other potential errors like permissions
-                    print(f"❌ An unexpected error occurred while copying or running the batch file: {e}")
-                    shutil.rmtree(script_dir)
-                    return "Error: Unexpected issue during dependency installation.", 500
-            else:
-                print(f"⚠️ Warning: Source batch file '{source_bat_path}' not found. Skipping dependency installation.")
+            print(f"Found requirements.txt at {req_path}. Installing dependencies.")
+            try:
+                install_requirements(req_path)
+                print("✅ Dependencies installed.")
+            except subprocess.CalledProcessError as e:
+                print(f"❌ Error installing dependencies: {e}")
+                shutil.rmtree(script_dir)
+                return "Error installing dependencies", 500
+            except Exception as e:
+                print(f"❌ Unexpected error installing dependencies: {e}")
+                shutil.rmtree(script_dir)
+                return "Error installing dependencies", 500
         else:
             print("No requirements.txt found. Skipping dependency installation.")
-        # --- End: Install requirements using venv.bat ---
+        # --- End: Install requirements ---
 
         # Update buttons.json and save image to app folder
         buttons_data = load_buttons()
@@ -323,9 +289,9 @@ def upload():
         # --- Dynamically register the app ---
 
         # Dynamically register the app
-        # IMPORTANT: As discussed, if the batch file installed new dependencies,
-        # this registration might still fail within the *same running process*
-        # due to Python's import caching. A restart of the main app might be needed.
+        # IMPORTANT: If new dependencies were installed, this registration might
+        # still fail within the same running process due to Python's import caching.
+        # A restart of the main app might be required.
         print("Attempting to register apps after upload...")
         try:
             register_all_apps()
@@ -525,40 +491,19 @@ def edit_script(folder_name):
             # Cleanup potentially broken state? Or rely on user to fix.
             return jsonify({"status": "error", "message": "No Python script found in new ZIP."}), 400
 
-        # --- Install requirements using venv.bat (NEW logic) ---
+        # --- Install requirements using pip ---
         req_path = os.path.join(script_dir, "requirements.txt")
         if os.path.exists(req_path):
-            print(f"Found requirements.txt in new ZIP for '{folder_name}'. Attempting installation via batch script.")
-            source_bat_path = os.path.join(BASE_DIR, "venv.bat")
-            dest_bat_path = os.path.join(script_dir, "venv.bat")
-
-            if os.path.exists(source_bat_path):
-                try:
-                    shutil.copy2(source_bat_path, dest_bat_path)
-                    print(f"Copied '{source_bat_path}' to '{dest_bat_path}'.")
-
-                    print(f"Attempting to run batch file: '{dest_bat_path}' from CWD: '{script_dir}' for edited app.")
-                    result = subprocess.run(
-                        [dest_bat_path], check=True, capture_output=True, text=True,
-                        shell=False, cwd=script_dir
-                    )
-                    print(f"✅ Batch file execution successful for edited '{folder_name}':")
-                    print("--- Batch Script Output Start ---")
-                    print(result.stdout)
-                    print("--- Batch Script Output End ---")
-                    # Optional: remove dest_bat_path
-
-                except Exception as e: # Catch broadly during edit
-                    print(f"❌ Error installing dependencies for edited '{folder_name}': {e}")
-                    # Print details if CalledProcessError
-                    if isinstance(e, subprocess.CalledProcessError):
-                         print(f"Return code: {e.returncode}")
-                         print(f"Stderr: {e.stderr}")
-                         print(f"Stdout: {e.stdout}")
-                    # Decide whether to stop the edit process
-                    return jsonify({"status": "error", "message": f"Failed to install dependencies from new ZIP: {e}"}), 500
-            else:
-                 print(f"⚠️ Warning: Source batch file '{source_bat_path}' not found. Skipping dependency installation for edited app.")
+            print(f"Found requirements.txt in new ZIP for '{folder_name}'. Installing dependencies.")
+            try:
+                install_requirements(req_path)
+                print("✅ Dependencies installed for edited app.")
+            except subprocess.CalledProcessError as e:
+                print(f"❌ Error installing dependencies for edited '{folder_name}': {e}")
+                return jsonify({"status": "error", "message": f"Failed to install dependencies from new ZIP: {e}"}), 500
+            except Exception as e:
+                print(f"❌ Unexpected error installing dependencies for edited '{folder_name}': {e}")
+                return jsonify({"status": "error", "message": f"Failed to install dependencies from new ZIP: {e}"}), 500
         else:
              print(f"No requirements.txt found in new ZIP for '{folder_name}'. Skipping dependency installation.")
         # --- End install requirements ---
