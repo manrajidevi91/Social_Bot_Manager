@@ -383,10 +383,23 @@ def delete_script(folder_name):
     # Step 8: Restart app.py
     try:
         importlib.invalidate_caches()
-        venv_python = os.path.join(BASE_DIR, "venv", "Scripts", "python.exe")
+
+        if os.name == "nt":
+            venv_python = os.path.join(BASE_DIR, "venv", "Scripts", "python.exe")
+            creationflags = subprocess.CREATE_NEW_CONSOLE
+        else:
+            venv_python = os.path.join(BASE_DIR, "venv", "bin", "python")
+            creationflags = 0
+
         main_app_path = os.path.join(BASE_DIR, "app.py")
         print(f"♻️ Restarting main app: {venv_python} {main_app_path}")
-        subprocess.Popen([venv_python, main_app_path], cwd=BASE_DIR, creationflags=subprocess.CREATE_NEW_CONSOLE)
+
+        popen_args = [venv_python, main_app_path]
+        if creationflags:
+            subprocess.Popen(popen_args, cwd=BASE_DIR, creationflags=creationflags)
+        else:
+            subprocess.Popen(popen_args, cwd=BASE_DIR)
+
         os._exit(0)
     except Exception as e:
         print(f"❌ Restart failed: {e}")
