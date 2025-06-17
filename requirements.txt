@@ -7,3 +7,4 @@ flask-session
 psutil
 flask-sse
 eventlet
+mysql-connector-python
