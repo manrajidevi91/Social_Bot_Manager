@@ -357,15 +357,8 @@ def delete_script(folder_name):
             shutil.rmtree(script_dir)
             deleted = True
             print(f"✅ Deleted with shutil: {script_dir}")
-    except PermissionError as e:
-        print(f"⚠️ shutil failed: {e}")
-        try:
-            subprocess.run(["rmdir", "/S", "/Q", script_dir], shell=True, check=True)
-            if not os.path.exists(script_dir):
-                deleted = True
-                print(f"✅ Deleted with rmdir fallback: {script_dir}")
-        except Exception as e:
-            print(f"❌ Force deletion failed: {e}")
+    except Exception as e:
+        print(f"❌ Error deleting {script_dir}: {e}")
 
     # Step 6: Delete image if applicable
     if image_path_in_app_folder and os.path.exists(image_path_in_app_folder):
