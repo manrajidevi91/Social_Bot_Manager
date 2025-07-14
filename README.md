@@ -43,3 +43,9 @@ sudo apt install mysql-server
 
 Create a database named `botmanager` and ensure that the credentials in `DB_USER`, `DB_PASSWORD`, `DB_HOST`, and `DB_PORT` match your MySQL setup.
 
+
+## Admin Backend
+
+The project now exposes a simple admin interface under `/admin`. Default credentials are `admin/admin123` which are inserted into the SQLite database on first run. Bots can be uploaded as ZIP archives and are mounted dynamically using `DispatcherMiddleware`.
+
+API endpoints are available under `/api/admin` and return JSON for integration with frontend applications. Only a subset is implemented (login and basic bot management) but the structure is designed to be extended.
