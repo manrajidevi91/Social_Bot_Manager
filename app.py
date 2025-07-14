@@ -19,6 +19,10 @@ def create_app():
     Migrate(app, db)
     for bp in all_blueprints:
         app.register_blueprint(bp)
+    @app.route('/')
+    def index():
+        from flask import redirect, url_for
+        return redirect(url_for('dashboard.index'))
     with app.app_context():
         db.create_all()
         if not Admin.query.filter_by(username='admin').first():
