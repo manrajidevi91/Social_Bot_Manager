@@ -167,5 +167,3 @@ This guide provides the full user and admin workflows for the Bot Management Saa
     - Bundle vs. package usage ratio
 
 ---
-
-This document will be updated as new modules are introduced.
