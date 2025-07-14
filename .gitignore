@@ -72,5 +72,4 @@ creds.json
 .env
 clean_git_secrets.bat
 run.bat
-.gitignore
 setup.bat
