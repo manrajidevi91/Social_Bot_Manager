@@ -1,0 +1,57 @@
+{
+  "default_ref": "refs/heads/main",
+  "branches": [
+    {
+      "ref": "refs/heads/codex/add-cache_version-to-render_template",
+      "head": "b2433ad8d5c5fe7e9f1e58157fcf7346dc96fd69"
+    },
+    {
+      "ref": "refs/heads/codex/build-admin-backend-for-subscription-bot-system",
+      "head": "c41fb1a04456557ca06d41546ef6e335ae8c96d5"
+    },
+    {
+      "ref": "refs/heads/codex/create-landing-page-with-discount-banner",
+      "head": "9433a533d71dbe99fd7967b05c8bb20ff1a2629b"
+    },
+    {
+      "ref": "refs/heads/codex/document-setup-steps-for-ubuntu",
+      "head": "890b955e8d70ddc053f50274bf8c870857df1dc5"
+    },
+    {
+      "ref": "refs/heads/codex/fix-python-path-and-creationflags-logic",
+      "head": "65c42aef05a2656a6a253db9d2567e8498277b10"
+    },
+    {
+      "ref": "refs/heads/codex/refactor-to-use-environment-variables-for-directories",
+      "head": "86a968b0c0be1e0d09f6af1c99015275dd3e0fbc"
+    },
+    {
+      "ref": "refs/heads/codex/remove-venv.bat-logic-and-add-install_requirements-helper",
+      "head": "b2d444a7b5eac4cf205daf5859806ab60cd42596"
+    },
+    {
+      "ref": "refs/heads/codex/update-installation-method-description",
+      "head": "201cc14e2761147d31246c2a61aa01df604f9e69"
+    },
+    {
+      "ref": "refs/heads/codex/update-requirements.txt-for-db_server.py",
+      "head": "017344f4ea7bf898086588e79e239cf0f73a1875"
+    },
+    {
+      "ref": "refs/heads/codex/use-shutil.rmtree-for-deletion",
+      "head": "586d0aaff6fab3372fe7e20d919896176b9aa573"
+    },
+    {
+      "ref": "refs/heads/main",
+      "head": "176c58932e54877bbe276750dd7c77b4f8f4d132"
+    },
+    {
+      "ref": "refs/heads/patch-1",
+      "head": "9b43254726581c5776d96331ed16ab2b34d9b498"
+    },
+    {
+      "ref": "refs/heads/revert-10-codex/build-admin-backend-for-subscription-bot-system",
+      "head": "75935012a985381d6981660aa5761326d2c9bc9a"
+    }
+  ]
+}
